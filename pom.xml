@@ -9,7 +9,7 @@
 
     <groupId>tech.rsqn.reflection-helpers</groupId>
     <artifactId>reflection-helpers</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>reflection-helpers</name>
@@ -20,7 +20,7 @@
         <connection>scm:git:git@github.com:rsqn/reflection-helpers.git</connection>
         <developerConnection>scm:git:git@github.com:rsqn/reflection-helpers.git</developerConnection>
         <url>https://github.com/mandrewes/reflection-helpers</url>
-        <tag>HEAD</tag>
+        <tag>reflection-helpers-1.0.1</tag>
     </scm>
 
     <licenses>
