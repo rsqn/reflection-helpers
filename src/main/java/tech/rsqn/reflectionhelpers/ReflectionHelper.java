@@ -21,8 +21,8 @@ public class ReflectionHelper {
     public static final String SET = "set";
 
     public static boolean reflectionEquals(Object a, Object b, boolean sysLog, String... ignore) {
-        List<BeanAttribute> attrListA = ReflectionHelper.collectAttributeMetaData(a);
-        List<BeanAttribute> attrListB = ReflectionHelper.collectAttributeMetaData(a);
+        List<AttributeDescriptor> attrListA = ReflectionHelper.collectAttributeMetaData(a);
+        List<AttributeDescriptor> attrListB = ReflectionHelper.collectAttributeMetaData(a);
 
         if (a.getClass() != b.getClass()) {
             logger.debug("Classes are not equal");
@@ -34,7 +34,7 @@ public class ReflectionHelper {
         }
 
         boolean ign = false;
-        for (BeanAttribute attrA : attrListA) {
+        for (AttributeDescriptor attrA : attrListA) {
             ign = false;
             for (String s : ignore) {
                 if (s.toLowerCase().equalsIgnoreCase(attrA.getSimplifiedName())) {
@@ -47,8 +47,8 @@ public class ReflectionHelper {
             }
             logger.debug("Comparing [" + attrA.getName() + "]");
 
-            BeanAttribute attrB = null;
-            for (BeanAttribute attrBIter : attrListB) {
+            AttributeDescriptor attrB = null;
+            for (AttributeDescriptor attrBIter : attrListB) {
                 if (attrBIter.getName().equals(attrA.getName())) {
                     attrB = attrBIter;
                     break;
@@ -186,12 +186,24 @@ public class ReflectionHelper {
         return ret;
     }
 
+    private static String getLowerCamelName(String name) {
+        return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, name);
+    }
+
     private static String getSimplifiedName(String name) {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name);
     }
 
-    private static String getAttributeName(String name) {
-        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name);
+    public static Map<String,AttributeDescriptor> collectAttributeMetaDataAsMapWithPossibleNames(Object o) {
+        List<AttributeDescriptor> attrs = collectAttributeMetaData(o);
+
+        Map<String,AttributeDescriptor> ret = new HashMap<>();
+
+        for (AttributeDescriptor attr : attrs) {
+            ret.put(attr.getName(),attr);
+            ret.put(attr.getSimplifiedName(),attr);
+        }
+        return ret;
     }
 
     /**
@@ -200,7 +212,7 @@ public class ReflectionHelper {
      * @param o
      * @return
      */
-    public static List<BeanAttribute> collectAttributeMetaData(Object o) {
+    public static List<AttributeDescriptor> collectAttributeMetaData(Object o) {
         Method[] methods;
         if (o instanceof Class) {
             methods = ((Class) o).getMethods();
@@ -208,7 +220,7 @@ public class ReflectionHelper {
             methods = o.getClass().getMethods();
         }
 
-        List<BeanAttribute> ret = new ArrayList<BeanAttribute>();
+        List<AttributeDescriptor> ret = new ArrayList<AttributeDescriptor>();
         String name;
         String nameLower;
 
@@ -236,12 +248,10 @@ public class ReflectionHelper {
                     // probably stuck int a list or map
                     continue;
                 }
-//                nameLower = name.toLowerCase();
                 nameLower = getSimplifiedName(name);
-//                nameLower = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE,name);
-                BeanAttribute attr = new BeanAttribute();
+                AttributeDescriptor attr = new AttributeDescriptor();
                 attr.setGetterMethod(method);
-                attr.setName(name);
+                attr.setName(getLowerCamelName(name));
                 attr.setSimplifiedName(nameLower);
                 attr.setType(method.getReturnType());
                 attr.setAnnotations(method.getAnnotations());
@@ -276,6 +286,17 @@ public class ReflectionHelper {
         return null;
     }
 
+    public static AttributeDescriptor getAttributeDescriptor(Object o, String name) {
+        List<AttributeDescriptor> all = collectAttributeMetaData(o);
+
+        for (AttributeDescriptor attributeDescriptor : all) {
+            if ( attributeDescriptor.getName().equals(name) || attributeDescriptor.getSimplifiedName().equals(name)) {
+                return attributeDescriptor;
+            }
+        }
+
+        return null;
+    }
 
     public static <T> T getAttribute(Object o, String name) {
         Method[] methods = o.getClass().getMethods();

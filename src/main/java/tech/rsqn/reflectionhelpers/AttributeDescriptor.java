@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class BeanAttribute {
+public class AttributeDescriptor {
 
     private Method getterMethod;
     private Method setterMethod;
@@ -113,7 +113,7 @@ public class BeanAttribute {
 
     @Override
     public String toString() {
-        return "BeanAttribute{" +
+        return "AttributeDescriptor{" +
                 "getterMethod=" + getterMethod +
                 ", setterMethod=" + setterMethod +
                 ", name='" + name + '\'' +
