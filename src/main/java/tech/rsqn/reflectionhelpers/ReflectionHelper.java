@@ -1,9 +1,12 @@
 package tech.rsqn.reflectionhelpers;
 
 import com.google.common.base.CaseFormat;
+import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -597,6 +600,24 @@ public class ReflectionHelper {
 
         return false;
     }
+
+
+    public static <T extends Annotation> T getAnnotationFromInvocation(
+            MethodInvocation invocation, Class<T> annotationClass) {
+        Method method = invocation.getMethod();
+        Method originalMethod = ReflectionUtils.findMethod(invocation.getThis()
+                        .getClass(),
+                method.getName(), method.getParameterTypes());
+
+        T ret = method.getAnnotation(annotationClass);
+
+        if (ret != null) {
+            return ret;
+        }
+
+        return originalMethod.getAnnotation(annotationClass);
+    }
+
 
     public static boolean isWrapperType(Class<?> clazz) {
         return clazz.equals(Boolean.class) || clazz.equals(Integer.class) ||
